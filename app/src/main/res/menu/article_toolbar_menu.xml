@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/add_to_fav"
+        android:title="@string/add_to_favorites" />
+    <item
+        android:id="@+id/enable_scroll"
+        android:title="@string/enable_auto_scroll" />
+    <item
+        android:id="@+id/delete_article"
+        android:title="@string/delete" />
+</menu>
