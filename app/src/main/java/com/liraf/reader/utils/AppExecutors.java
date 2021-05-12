@@ -13,10 +13,10 @@ public class AppExecutors {
 
     private static AppExecutors instance;
 
-    public static AppExecutors getInstance(){
-        if(instance == null){
+    public static AppExecutors getInstance() {
+        if (instance == null)
             instance = new AppExecutors();
-        }
+
         return instance;
     }
 
@@ -24,16 +24,15 @@ public class AppExecutors {
 
     private final Executor mMainThreadExecutor = new MainThreadExecutor();
 
-
-    public Executor diskIO(){
+    public Executor diskIO() {
         return mDiskIO;
     }
 
-    public Executor mainThread(){
+    public Executor mainThread() {
         return mMainThreadExecutor;
     }
 
-    private static class MainThreadExecutor implements Executor{
+    private static class MainThreadExecutor implements Executor {
 
         private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 

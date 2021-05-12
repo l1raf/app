@@ -33,6 +33,10 @@ public class ArticleListViewModel extends AndroidViewModel {
         return articleRepository.getAllArticles(shouldFetch);
     }
 
+    public LiveData<List<ArticleEntity>> getFavArticles() {
+        return articleRepository.loadFavArticlesFromDb();
+    }
+
     public LiveData<List<Article>> getArticles() {
         return articles;
     }

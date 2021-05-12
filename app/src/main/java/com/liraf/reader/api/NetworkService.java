@@ -5,6 +5,8 @@ import android.content.Context;
 import com.liraf.reader.repositories.AccountRepository;
 import com.liraf.reader.utils.LiveDataCallAdapterFactory;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -27,6 +29,7 @@ public class NetworkService {
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
+                    .readTimeout(60, TimeUnit.SECONDS)
                     .addInterceptor(new TokenInterceptor(accountRepository))
                     .authenticator(new TokenAuthenticator(accountRepository))
                     .build();

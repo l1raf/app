@@ -2,27 +2,25 @@ package com.liraf.reader.ui.article;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.text.HtmlCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.webkit.WebView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.SeekBar;
+import android.widget.Switch;
 
-import com.bumptech.glide.Glide;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.liraf.reader.R;
+import com.liraf.reader.models.Article;
 import com.liraf.reader.models.ArticleEntity;
-import com.liraf.reader.models.article.Content;
-import com.liraf.reader.models.article.ElementType;
 import com.liraf.reader.ui.main.MainActivity;
 import com.liraf.reader.viewmodels.ArticleViewModel;
 
@@ -30,6 +28,10 @@ public class ArticleActivity extends AppCompatActivity {
 
     private String articleUrl;
     private ArticleViewModel articleViewModel;
+    private Article article;
+    private ArticleAdapter articleAdapter;
+    private LinearLayoutManagerWithSmoothScroller linearLayoutManagerWithSmoothScroller;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,27 +39,28 @@ public class ArticleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_article);
 
         articleViewModel = new ViewModelProvider(this).get(ArticleViewModel.class);
-        LinearLayout linearLayout = findViewById(R.id.scrollview_linear_layout);
-        NestedScrollView scrollView = findViewById(R.id.scroll_view);
+
         Toolbar toolbar = findViewById(R.id.article_toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-//        button.setOnClickListener(v -> {
-//            int targetScrollY = scrollView.getChildAt(0).getHeight();
-//
-//            ValueAnimator smoothScrollAnimation =
-//                    ValueAnimator.ofInt(scrollView.getScrollY(), targetScrollY);
-//
-//            smoothScrollAnimation.setDuration(6 * targetScrollY);
-//
-//            smoothScrollAnimation.addUpdateListener(animation -> {
-//                int scrollTo = (Integer) animation.getAnimatedValue();
-//                scrollView.scrollTo(0, scrollTo);
-//            });
-//
-//            smoothScrollAnimation.start();
-//        });
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setTitle("Article View");
+        toolbar.setTitle("Article View");
+
+        recyclerView = findViewById(R.id.recycler_view_article_content);
+
+        linearLayoutManagerWithSmoothScroller = new LinearLayoutManagerWithSmoothScroller(this);
+        recyclerView.setLayoutManager(linearLayoutManagerWithSmoothScroller);
+
+        articleAdapter = new ArticleAdapter(this);
+        recyclerView.setAdapter(articleAdapter);
+
+        AppBarLayout appBarLayout = findViewById(R.id.app_bar);
+        appBarLayout.addOnOffsetChangedListener((appBarLayout1, verticalOffset) -> {
+            if (articleViewModel.isScrollEnabled() && Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) // collapsed
+                recyclerView.smoothScrollToPosition(articleAdapter.getItemCount() - 1);
+        });
 
         if (getIntent().hasExtra("article")) {
             articleUrl = getIntent().getStringExtra("article");
@@ -68,36 +71,25 @@ public class ArticleActivity extends AppCompatActivity {
                 articleViewModel.loadArticleFromDb(articleUrl).observe(this, articleResource -> {
                     if (articleResource != null && articleResource.data != null) {
                         ArticleEntity articleEntity = articleResource.data;
+                        article = articleEntity.getArticle();
 
-                        for (Content content : articleEntity.getContent()) {
-                            if (content.getType() == ElementType.Text.ordinal()) {
-                                TextView textView = new TextView(this);
-
-                                textView.setText(Html.fromHtml(content.getText(), HtmlCompat.FROM_HTML_MODE_LEGACY));
-                                textView.setTextAppearance(R.style.TextViewWhite);
-                                textView.setLinkTextColor(getColor(R.color.purple_700));
-
-                                textView.setMovementMethod(LinkMovementMethod.getInstance());
-
-                                linearLayout.addView(textView);
-                            } else if (content.getType() == ElementType.Image.ordinal()) {
-                                ImageView imageView = new ImageView(this);
-
-                                Glide.with(this)
-                                        .load(content.getUrl())
-                                        .into(imageView);
-
-                                linearLayout.addView(imageView);
-                            } else if (content.getType() == ElementType.Table.ordinal()) {
-                                WebView webView = new WebView(this);
-                                webView.loadDataWithBaseURL("", content.getText(), "text/html", "UTF-8", "");
-                                linearLayout.addView(webView);
-                            }
-                        }
+                        articleAdapter.setContent(articleEntity.getContent());
                     }
                 });
             }
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.add_to_fav);
+
+        if (article != null && !article.isFavorite())
+            item.setTitle(R.string.add_to_favorites);
+        else
+            item.setTitle(R.string.remove_from_favorites);
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -115,8 +107,61 @@ public class ArticleActivity extends AppCompatActivity {
             articleViewModel.deleteArticle(articleUrl);
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+        } else if (id == R.id.add_to_fav) {
+            if (article != null)
+                articleViewModel.addToFavorites(articleUrl, !article.isFavorite());
+        } else if (id == R.id.web) {
+            if (article != null) {
+                Intent intent = new Intent(this, WebActivity.class);
+                intent.putExtra("articleUrl", article.getUrl());
+                startActivity(intent);
+            }
+        } else if (id == R.id.text) {
+            initBottomSheet();
         }
 
         return true;
+    }
+
+    private void initBottomSheet() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ArticleActivity.this, R.style.BottomSheetTheme);
+
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(
+                        R.layout.bottom_sheet_font_settings,
+                        findViewById(R.id.bottom_sheet)
+                );
+
+        SeekBar seekBar = bottomSheetView.findViewById(R.id.scroll_speed_seek_bar);
+        seekBar.setProgress(articleViewModel.getScrollSpeed());
+
+        @SuppressLint("UseSwitchCompatOrMaterialCode")
+        Switch switchButton = bottomSheetView.findViewById(R.id.switch_enable_scroll);
+
+        switchButton.setChecked(articleViewModel.isScrollEnabled());
+        switchButton.setOnCheckedChangeListener((buttonView, isChecked) -> articleViewModel.setScrollEnabled(isChecked));
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                articleViewModel.setScrollSpeed(progress);
+                linearLayoutManagerWithSmoothScroller.setScrollSpeed(11000 - progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        bottomSheetView.findViewById(R.id.image_view_increase_text).setOnClickListener(v -> articleAdapter.increaseTextSize(1));
+
+        bottomSheetView.findViewById(R.id.image_view_decrease_text).setOnClickListener(v -> articleAdapter.increaseTextSize(-1));
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
     }
 }

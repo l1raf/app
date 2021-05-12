@@ -48,6 +48,12 @@ public class UserPreferences {
         );
     }
 
+    public void removeUser() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+    }
+
     public void saveUser(User user) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 

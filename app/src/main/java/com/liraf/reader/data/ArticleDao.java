@@ -2,14 +2,15 @@ package com.liraf.reader.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
+import androidx.room.Update;
 
 import com.liraf.reader.models.Article;
 import com.liraf.reader.models.ArticleEntity;
+import com.liraf.reader.models.ArticleFavUpdate;
 import com.liraf.reader.models.article.Content;
 
 import java.util.List;
@@ -37,6 +38,12 @@ public abstract class ArticleDao {
             content.setArticleUrlFk(article.getArticle().getUrl());
         insertContent(article.getContent());
     }
+
+    @Query("SELECT * FROM article WHERE favorite = 1")
+    public abstract LiveData<List<ArticleEntity>> getFavArticles();
+
+    @Update(entity = Article.class)
+    public abstract void updateFav(ArticleFavUpdate obj);
 
     @Query("SELECT * FROM article WHERE url = :url")
     @Transaction

@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/add_to_fav"
         android:title="@string/add_to_favorites" />
     <item
-        android:id="@+id/enable_scroll"
-        android:title="@string/enable_auto_scroll" />
-    <item
         android:id="@+id/delete_article"
         android:title="@string/delete" />
+
+    <item
+        android:id="@+id/text"
+        android:icon="@drawable/ic_text_32"
+        android:title="@string/text_settings"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/web"
+        android:icon="@drawable/ic_globe"
+        android:title="@string/switch_to_web_view"
+        app:showAsAction="ifRoom" />
 </menu>

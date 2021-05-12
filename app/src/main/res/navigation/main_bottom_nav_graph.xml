@@ -8,16 +8,16 @@
     <fragment
         android:id="@+id/favoritesFragment"
         android:name="com.liraf.reader.ui.main.FavoritesFragment"
-        android:label="Favorites"
+        android:label="@string/favorites"
         tools:layout="@layout/fragment_favorites" />
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.liraf.reader.ui.main.HomeFragment"
-        android:label="Home"
+        android:label="@string/home"
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.liraf.reader.ui.main.SettingsFragment"
-        android:label="Settings"
+        android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />
 </navigation>

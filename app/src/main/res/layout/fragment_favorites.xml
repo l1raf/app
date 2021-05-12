@@ -5,4 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.FavoritesFragment">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:paddingTop="8dp"
+        android:clipToPadding="false"
+        android:id="@+id/fav_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/article_item" />
+
 </FrameLayout>

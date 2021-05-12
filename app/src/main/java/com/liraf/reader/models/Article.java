@@ -19,6 +19,7 @@ public class Article {
     private String image;
     private String description;
     private String author;
+    private boolean favorite;
     @Ignore
     private List<Content> content;
 
@@ -68,5 +69,13 @@ public class Article {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 }

@@ -10,7 +10,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/MainTheme">
+        android:theme="@style/MainTheme"
+        android:usesCleartextTraffic="true">
 
         <activity android:name=".ui.article.WebActivity" />
 
@@ -20,7 +21,9 @@
 
         <activity
             android:name=".ui.main.MainActivity"
-            android:theme="@style/SplashTheme">
+            android:launchMode="singleTask"
+            android:theme="@style/SplashTheme"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

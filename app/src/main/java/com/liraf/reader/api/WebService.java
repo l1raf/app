@@ -3,9 +3,11 @@ package com.liraf.reader.api;
 import androidx.lifecycle.LiveData;
 
 import com.liraf.reader.models.Article;
+import com.liraf.reader.models.ArticleFavUpdate;
 import com.liraf.reader.models.requests.AuthUser;
 import com.liraf.reader.models.requests.RefreshTokenRequest;
 import com.liraf.reader.models.requests.RegisterUser;
+import com.liraf.reader.models.requests.UpdateUser;
 import com.liraf.reader.models.requests.WebPage;
 import com.liraf.reader.models.responses.ApiResponse;
 import com.liraf.reader.models.responses.AuthUserResponse;
@@ -18,6 +20,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Query;
 
 public interface WebService {
@@ -47,4 +50,10 @@ public interface WebService {
 
     @DELETE("api/webpages/")
     Call<Void> deleteArticle(@Query("uri") String url);
+
+    @PUT("api/webpages/")
+    Call<Void> updateArticle(@Body ArticleFavUpdate articleFavUpdate);
+
+    @PUT("api/users/")
+    Call<Void> updateUser(@Body UpdateUser user);
 }

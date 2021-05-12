@@ -1,13 +1,12 @@
 package com.liraf.reader.repositories;
 
 import android.app.Application;
-import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.liraf.reader.R;
 import com.liraf.reader.api.NetworkService;
@@ -15,6 +14,7 @@ import com.liraf.reader.data.ArticleDao;
 import com.liraf.reader.data.ArticleDatabase;
 import com.liraf.reader.models.Article;
 import com.liraf.reader.models.ArticleEntity;
+import com.liraf.reader.models.ArticleFavUpdate;
 import com.liraf.reader.models.requests.WebPage;
 import com.liraf.reader.models.responses.ApiResponse;
 import com.liraf.reader.utils.AppExecutors;
@@ -45,15 +45,52 @@ public class ArticleRepository {
         return instance;
     }
 
+    public void deleteAllArticlesFromDb() {
+        ArticleDatabase.getDatabaseWriteExecutor().execute(articleDao::deleteAllArticles);
+    }
+
     public void saveWebPage(WebPage webPage) {
         NetworkService.getWebService(application).saveWebPage(webPage)
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful())
-                            Toast.makeText(application, "Successfully added article", Toast.LENGTH_LONG).show();
+                            Toast.makeText(application, "Successfully added article", Toast.LENGTH_LONG).show(); //TODO: remove
                         else
-                            Toast.makeText(application, "Failed to add article", Toast.LENGTH_LONG).show();
+                            Toast.makeText(application, "Failed to add article", Toast.LENGTH_LONG).show(); //TODO: remove
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(application, application.getResources().getString(R.string.unknown_error), Toast.LENGTH_LONG).show(); //TODO: remove
+                    }
+                });
+    }
+
+    public LiveData<List<ArticleEntity>> loadFavArticlesFromDb() {
+        return articleDao.getFavArticles();
+    }
+
+    public void addToFavorites(String url, boolean makeFav) {
+        ArticleDatabase.getDatabaseWriteExecutor().execute(() -> {
+            Log.d("DB", "Make favorite: " + makeFav);
+            articleDao.updateFav(new ArticleFavUpdate(url, makeFav));
+        });
+
+        NetworkService.getWebService(application).updateArticle(new ArticleFavUpdate(url, makeFav))
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        Log.d("API", "Make favorite: " + makeFav);
+
+                        if (response.isSuccessful() && makeFav)
+                            Toast.makeText(application, "Successfully added to favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                        else if (response.isSuccessful())
+                            Toast.makeText(application, "Successfully removed from favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                        else if (makeFav)
+                            Toast.makeText(application, "Failed to add to favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                        else
+                            Toast.makeText(application, "Failed to remove from favorites", Toast.LENGTH_LONG).show(); //TODO: remove
                     }
 
                     @Override
@@ -64,16 +101,16 @@ public class ArticleRepository {
     }
 
     public void deleteArticle(String url) {
-        new DeleteArticle(url).execute();
+        ArticleDatabase.getDatabaseWriteExecutor().execute(() -> articleDao.deleteArticle(url));
 
         NetworkService.getWebService(application).deleteArticle(url)
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful())
-                            Toast.makeText(application, "Successfully deleted article", Toast.LENGTH_LONG).show();
+                            Toast.makeText(application, "Successfully deleted article", Toast.LENGTH_LONG).show(); //TODO: remove
                         else
-                            Toast.makeText(application, "Failed to delete article", Toast.LENGTH_LONG).show();
+                            Toast.makeText(application, "Failed to delete article", Toast.LENGTH_LONG).show(); //TODO: remove
                     }
 
                     @Override
@@ -81,26 +118,6 @@ public class ArticleRepository {
                         Toast.makeText(application, application.getResources().getString(R.string.unknown_error), Toast.LENGTH_LONG).show();
                     }
                 });
-    }
-
-    private class DeleteArticle extends AsyncTask<Void, Void, Void> {
-
-        private String url;
-
-        public DeleteArticle(String url) {
-            this.url = url;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            articleDao.deleteArticle(url);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
     }
 
     public LiveData<Resource<List<ArticleEntity>>> getAllArticles(boolean shouldFetch) {

@@ -1,6 +1,7 @@
 package com.liraf.reader.repositories;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -11,6 +12,7 @@ import com.liraf.reader.models.User;
 import com.liraf.reader.models.requests.AuthUser;
 import com.liraf.reader.models.requests.RefreshTokenRequest;
 import com.liraf.reader.models.requests.RegisterUser;
+import com.liraf.reader.models.requests.UpdateUser;
 import com.liraf.reader.models.responses.AuthUserResponse;
 import com.liraf.reader.utils.Resource;
 
@@ -50,6 +52,33 @@ public class AccountRepository {
         userPreferences.saveToken(accessToken, refreshToken);
     }
 
+    public void updateUser(User user) {
+        userPreferences.saveUser(user);
+
+        NetworkService.getWebService(context).updateUser(new UpdateUser(
+                user.getDisplayName(),
+                user.getLogin(),
+                user.getPassword())
+        ).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful())
+                    Toast.makeText(context, "Successfully updated user", Toast.LENGTH_LONG).show(); //TODO: remove
+                else
+                    Toast.makeText(context, "Failed to update user", Toast.LENGTH_LONG).show(); //TODO: remove
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, R.string.unknown_error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public User getUser() {
+        return userPreferences.getUser();
+    }
+
     public void saveUser(User user) {
         userPreferences.saveUser(user);
     }
@@ -63,9 +92,12 @@ public class AccountRepository {
 
             if (response.isSuccessful()) {
                 AuthUserResponse result = response.body();
-                saveTokens(result.getAccessToken(), result.getRefreshToken());
 
-                return result.getAccessToken();
+                if (result != null) {
+                    saveTokens(result.getAccessToken(), result.getRefreshToken());
+
+                    return result.getAccessToken();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,7 +138,7 @@ public class AccountRepository {
                         if (response.isSuccessful() && response.body() != null) {
                             loginResult.postValue(Resource.success(response.body()));
                         } else if (response.code() == 404) {
-                            loginResult.postValue(Resource.error(context.getResources().getString(R.string.not_found), null));
+                            loginResult.postValue(Resource.error(context.getResources().getString(R.string.wrong_credentials), null));
                         } else {
                             loginResult.postValue(Resource.error(context.getResources().getString(R.string.wrong_credentials), null));
                         }
@@ -117,5 +149,9 @@ public class AccountRepository {
                         loginResult.postValue(Resource.error(context.getResources().getString(R.string.auth_failed), null));
                     }
                 });
+    }
+
+    public void removeUser() {
+        userPreferences.removeUser();
     }
 }

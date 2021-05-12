@@ -2,15 +2,12 @@
     <string name="app_name">Reader</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_up">Sign up</string>
-    <string name="or">Or</string>
-    <string name="continue_without_account">Continue without account</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="prompt_confirm_password">Confirm password</string>
     <string name="prompt_name">Name</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome!"</string>
     <string name="invalid_username">Invalid email format</string>
     <string name="invalid_password">Password must contain at least 8 characters and at least 1 number</string>
     <string name="login_failed">"Login failed"</string>
@@ -18,7 +15,7 @@
     <string name="not_found">User not found</string>
     <string name="auth_failed">Failed to sign in. Check your internet connection</string>
     <string name="register_failed">Failed to sign up. Check your internet connection</string>
-    <string name="invalid_name">Name must contain at least 4 characters</string>
+    <string name="invalid_name">Name must contain at least 3 characters</string>
     <string name="not_confirmed">Passwords don\'t match</string>
     <string name="unknown_error">Unknown error</string>
     <string name="register_success">Successfully registered</string>
@@ -27,6 +24,18 @@
     <string name="home">Home</string>
     <string name="network_error">Unknown error. Check internet connection</string>
     <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
     <string name="enable_auto_scroll">Enable auto scroll</string>
     <string name="delete">Delete</string>
+    <string name="log_out">Logout</string>
+    <string name="switch_to_web_view">Switch to Web View</string>
+    <string name="search">Search</string>
+    <string name="open_copied_url">Open copied url</string>
+    <string name="invalid_url">Invalid url</string>
+    <string name="text_settings">Text settings</string>
+    <string name="text_size">Text size</string>
+    <string name="scroll_speed">Scroll speed</string>
+    <string name="sign_in_action">Sign in</string>
+    <string name="sign_up_action">Sign up</string>
+    <string name="save_changes">Save changes</string>
 </resources>
