@@ -57,7 +57,7 @@ public class RegistrationFragment extends Fragment {
             String password = passwordEditText.getText().toString();
             String confirmPassword = confirmPasswordEditText.getText().toString();
 
-            boolean isValidName = name.trim().length() > 3;
+            boolean isValidName = name.trim().length() > 2;
             boolean isValidEmail = CredentialsValidator.isUserNameValid(email);
             boolean isValidPassword = CredentialsValidator.isPasswordValid(password);
             boolean passwordsMatch = password.equals(confirmPassword);
@@ -66,7 +66,7 @@ public class RegistrationFragment extends Fragment {
                 nameEditText.setError(getResources().getString(R.string.invalid_name));
 
             if (!isValidEmail)
-                emailEditText.setError(getResources().getString(R.string.invalid_username));
+                emailEditText.setError(getResources().getString(R.string.invalid_login));
 
             if (!isValidPassword)
                 passwordEditText.setError(getResources().getString(R.string.invalid_password));
@@ -75,7 +75,9 @@ public class RegistrationFragment extends Fragment {
                 confirmPasswordEditText.setError(getResources().getString(R.string.not_confirmed));
 
             if (isValidName && isValidEmail && isValidPassword && passwordsMatch) {
-
+                user.setPassword(password);
+                user.setLogin(email);
+                user.setDisplayName(name);
                 authViewModel.register(name, email, password);
             }
         });
@@ -90,7 +92,6 @@ public class RegistrationFragment extends Fragment {
 
                     if (registerResult.data != null) {
                         user.setUserId(registerResult.data.getId());
-                        user.setDisplayName(registerResult.data.getName());
 
                         authViewModel.saveUser(user);
                         authViewModel.saveTokens(registerResult.data.getAccessToken(), registerResult.data.getRefreshToken());
@@ -98,6 +99,7 @@ public class RegistrationFragment extends Fragment {
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
+                        authViewModel.resetLoginResult();
                     }
                 } else {
                     progressBar.setVisibility(View.GONE);

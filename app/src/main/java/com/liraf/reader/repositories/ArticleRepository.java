@@ -55,14 +55,14 @@ public class ArticleRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful())
-                            Toast.makeText(application, "Successfully added article", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.successfully_added, Toast.LENGTH_LONG).show();
                         else
-                            Toast.makeText(application, "Failed to add article", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.failed_to_add, Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(application, application.getResources().getString(R.string.unknown_error), Toast.LENGTH_LONG).show(); //TODO: remove
+                        Toast.makeText(application, application.getResources().getString(R.string.unknown_error), Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -84,13 +84,13 @@ public class ArticleRepository {
                         Log.d("API", "Make favorite: " + makeFav);
 
                         if (response.isSuccessful() && makeFav)
-                            Toast.makeText(application, "Successfully added to favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.added_to_fav, Toast.LENGTH_LONG).show();
                         else if (response.isSuccessful())
-                            Toast.makeText(application, "Successfully removed from favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.removed_from_fav, Toast.LENGTH_LONG).show();
                         else if (makeFav)
-                            Toast.makeText(application, "Failed to add to favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.failed_to_add_fav, Toast.LENGTH_LONG).show();
                         else
-                            Toast.makeText(application, "Failed to remove from favorites", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.failed_to_remove_fav, Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -108,9 +108,9 @@ public class ArticleRepository {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful())
-                            Toast.makeText(application, "Successfully deleted article", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.deleted_article, Toast.LENGTH_LONG).show();
                         else
-                            Toast.makeText(application, "Failed to delete article", Toast.LENGTH_LONG).show(); //TODO: remove
+                            Toast.makeText(application, R.string.failed_to_delete_article, Toast.LENGTH_LONG).show();
                     }
 
                     @Override

@@ -1,6 +1,5 @@
 package com.liraf.reader.utils;
 
-
 import android.os.Handler;
 import android.os.Looper;
 

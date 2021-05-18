@@ -29,7 +29,7 @@ public class NetworkService {
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
-                    .readTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.MINUTES)
                     .addInterceptor(new TokenInterceptor(accountRepository))
                     .authenticator(new TokenAuthenticator(accountRepository))
                     .build();

@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -30,7 +31,7 @@ public class ArticleActivity extends AppCompatActivity {
     private ArticleViewModel articleViewModel;
     private Article article;
     private ArticleAdapter articleAdapter;
-    private LinearLayoutManagerWithSmoothScroller linearLayoutManagerWithSmoothScroller;
+    private ManagerWithSmoothScroller linearLayoutManagerWithSmoothScroller;
     private RecyclerView recyclerView;
 
     @Override
@@ -44,13 +45,9 @@ public class ArticleActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setTitle("Article View");
-        toolbar.setTitle("Article View");
-
         recyclerView = findViewById(R.id.recycler_view_article_content);
 
-        linearLayoutManagerWithSmoothScroller = new LinearLayoutManagerWithSmoothScroller(this);
+        linearLayoutManagerWithSmoothScroller = new ManagerWithSmoothScroller(this);
         recyclerView.setLayoutManager(linearLayoutManagerWithSmoothScroller);
 
         articleAdapter = new ArticleAdapter(this);
@@ -59,7 +56,7 @@ public class ArticleActivity extends AppCompatActivity {
         AppBarLayout appBarLayout = findViewById(R.id.app_bar);
         appBarLayout.addOnOffsetChangedListener((appBarLayout1, verticalOffset) -> {
             if (articleViewModel.isScrollEnabled() && Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) // collapsed
-                recyclerView.smoothScrollToPosition(articleAdapter.getItemCount() - 1);
+                recyclerView.smoothScrollToPosition(articleAdapter.getItemCount());
         });
 
         if (getIntent().hasExtra("article")) {
@@ -72,7 +69,6 @@ public class ArticleActivity extends AppCompatActivity {
                     if (articleResource != null && articleResource.data != null) {
                         ArticleEntity articleEntity = articleResource.data;
                         article = articleEntity.getArticle();
-
                         articleAdapter.setContent(articleEntity.getContent());
                     }
                 });
@@ -112,15 +108,29 @@ public class ArticleActivity extends AppCompatActivity {
                 articleViewModel.addToFavorites(articleUrl, !article.isFavorite());
         } else if (id == R.id.web) {
             if (article != null) {
-                Intent intent = new Intent(this, WebActivity.class);
-                intent.putExtra("articleUrl", article.getUrl());
-                startActivity(intent);
+                if (isConnected()) {
+                    Intent intent = new Intent(this, WebActivity.class);
+                    intent.putExtra("articleUrl", article.getUrl());
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, R.string.internet_required, Toast.LENGTH_LONG).show();
+                }
             }
         } else if (id == R.id.text) {
             initBottomSheet();
         }
 
         return true;
+    }
+
+    public boolean isConnected() {
+        String command = "ping -i 5 -c 1 google.com";
+        try {
+            return Runtime.getRuntime().exec(command).waitFor() == 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void initBottomSheet() {

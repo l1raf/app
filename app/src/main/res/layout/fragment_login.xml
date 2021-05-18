@@ -23,7 +23,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.15" />
+        app:layout_constraintVertical_bias="0.10" />
 
     <EditText
         android:id="@+id/username"
@@ -31,9 +31,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:autofillHints="@string/prompt_email"
+        android:autofillHints="@string/prompt_login"
         android:backgroundTint="@color/colorPrimaryVariant"
-        android:hint="@string/prompt_email"
+        android:hint="@string/prompt_login"
         android:inputType="textEmailAddress"
         android:selectAllOnFocus="true"
         app:layout_constraintBottom_toBottomOf="parent"

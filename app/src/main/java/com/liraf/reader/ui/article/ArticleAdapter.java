@@ -88,7 +88,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             case TABLE_TYPE:
                 if (articleContent.get(position) != null && holder instanceof TableViewHolder)
-                    ((TableViewHolder) holder).onBind(articleContent.get(position));
+                    ((TableViewHolder) holder).onBind(articleContent.get(position), textSize);
         }
     }
 
@@ -107,7 +107,8 @@ public class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             this.webView = itemView.findViewById(R.id.article_content_table);
         }
 
-        public void onBind(Content content) {
+        public void onBind(Content content, int textSize) {
+            webView.getSettings().setDefaultFontSize(webView.getSettings().getDefaultFontSize() + textSize);
             webView.loadDataWithBaseURL("", content.getText(), "text/html", "UTF-8", "");
         }
     }

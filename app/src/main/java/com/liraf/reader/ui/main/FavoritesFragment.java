@@ -78,7 +78,7 @@ public class FavoritesFragment extends Fragment implements OnArticleListener {
         ViewPreloadSizeProvider<String> viewPreloadSizeProvider = new ViewPreloadSizeProvider<>();
         articleAdapter = new ArticlesAdapter(initGlide(), viewPreloadSizeProvider, this);
 
-        RecyclerViewPreloader<String> preloader = new RecyclerViewPreloader<String>(
+        RecyclerViewPreloader<String> preloader = new RecyclerViewPreloader<>(
                 Glide.with(this),
                 articleAdapter,
                 viewPreloadSizeProvider,

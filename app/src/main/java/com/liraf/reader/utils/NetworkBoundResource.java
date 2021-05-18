@@ -16,8 +16,6 @@ import com.liraf.reader.models.responses.ApiResponse;
 // RequestObject: Type for the API response. (network request)
 public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
-    private static final String TAG = "NetworkBoundResource";
-
     private final AppExecutors appExecutors;
     private final MediatorLiveData<Resource<CacheObject>> results = new MediatorLiveData<>();
 
@@ -43,9 +41,6 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
     }
 
     private void fetchFromNetwork(final LiveData<CacheObject> dbSource) {
-
-        Log.d(TAG, "fetchFromNetwork: called.");
-
         results.addSource(dbSource, cacheObject -> setValue(Resource.loading(cacheObject)));
 
         final LiveData<ApiResponse<RequestObject>> apiResponse = createCall();
@@ -55,21 +50,13 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
             results.removeSource(apiResponse);
 
             if (requestObjectApiResponse instanceof ApiResponse.ApiSuccessResponse) {
-                Log.d(TAG, "onChanged: ApiSuccessResponse.");
-
                 appExecutors.diskIO().execute(() -> {
-
                     saveCallResult((RequestObject) processResponse((ApiResponse.ApiSuccessResponse) requestObjectApiResponse));
-
                     appExecutors.mainThread().execute(() -> results.addSource(loadFromDb(), cacheObject -> setValue(Resource.success(cacheObject))));
                 });
             } else if (requestObjectApiResponse instanceof ApiResponse.ApiEmptyResponse) {
-                Log.d(TAG, "onChanged: ApiEmptyResponse");
-
                 appExecutors.mainThread().execute(() -> results.addSource(loadFromDb(), cacheObject -> setValue(Resource.success(cacheObject))));
             } else if (requestObjectApiResponse instanceof ApiResponse.ApiErrorResponse) {
-                Log.d(TAG, "onChanged: ApiErrorResponse.");
-
                 results.addSource(dbSource, cacheObject -> setValue(
                         Resource.error(
                                 ((ApiResponse.ApiErrorResponse) requestObjectApiResponse).getErrorMessage(),

@@ -1,14 +1,15 @@
 package com.liraf.reader.ui.main;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,7 +17,6 @@ import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
-import com.liraf.reader.R;
 import com.liraf.reader.databinding.ArticleItemBinding;
 import com.liraf.reader.models.Article;
 import com.liraf.reader.ui.article.OnArticleListener;
@@ -26,9 +26,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder> implements
-        ListPreloader.PreloadModelProvider<String> {
+        ListPreloader.PreloadModelProvider<String>, Filterable {
 
-    private List<Article> articles = new ArrayList<>();
+    private List<Article> articles;
+    private final AsyncListDiffer<Article> mDiffer = new AsyncListDiffer<>(this, diffCallback);
     private final RequestManager requestManager;
     private final ViewPreloadSizeProvider<String> viewPreloadSizeProvider;
     private final OnArticleListener onArticleListener;
@@ -39,22 +40,17 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         this.requestManager = requestManager;
         this.viewPreloadSizeProvider = viewPreloadSizeProvider;
         this.onArticleListener = onArticleListener;
+        articles = new ArrayList<>();
     }
 
     public Article getSelectedArticle(int position) {
-        if (articles != null && articles.size() > 0)
-            return articles.get(position);
-
-        return null;
+        return mDiffer.getCurrentList().get(position);
     }
 
     @NonNull
     @Override
     public ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.article_item, parent, false);
         return new ArticleViewHolder(
-                itemView,
                 onArticleListener,
                 requestManager,
                 viewPreloadSizeProvider,
@@ -63,7 +59,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
 
     @Override
     public void onBindViewHolder(@NonNull ArticleViewHolder holder, int position) {
-        Article article = articles.get(position);
+        Article article = mDiffer.getCurrentList().get(position);
         if (article != null)
             holder.onBind(article);
 
@@ -72,19 +68,18 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
 
     @Override
     public int getItemCount() {
-        return articles.size();
+        return mDiffer.getCurrentList().size();
     }
 
     public void setArticles(List<Article> articles) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ArticleComparator(this.articles, articles));
-        this.articles = articles;
-        diffResult.dispatchUpdatesTo(this);
+        mDiffer.submitList(articles);
+        this.articles = mDiffer.getCurrentList();
     }
 
     @NonNull
     @Override
     public List<String> getPreloadItems(int position) {
-        String url = articles.get(position).getImage();
+        String url = mDiffer.getCurrentList().get(position).getImage();
 
         if (TextUtils.isEmpty(url))
             return Collections.emptyList();
@@ -98,6 +93,40 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         return requestManager.load(item);
     }
 
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
+
+    private final Filter filter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Article> filteredList = new ArrayList<>();
+
+            if (constraint.toString().isEmpty()) {
+                filteredList = articles;
+            } else {
+                String query = constraint.toString().toLowerCase();
+
+                for (Article article : mDiffer.getCurrentList()) {
+                    if (article.getTitle() != null && article.getTitle().toLowerCase().contains(query)) {
+                        filteredList.add(article);
+                    }
+                }
+            }
+
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filteredList;
+
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mDiffer.submitList((List<Article>) results.values);
+        }
+    };
+
     static class ArticleViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final RequestManager requestManager;
@@ -105,8 +134,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         private final ArticleItemBinding binding;
         private final OnArticleListener onArticleListener;
 
-        public ArticleViewHolder(@NonNull View itemView,
-                                 OnArticleListener onArticleListener,
+        public ArticleViewHolder(OnArticleListener onArticleListener,
                                  RequestManager requestManager,
                                  ViewPreloadSizeProvider<String> viewPreloadSizeProvider,
                                  ArticleItemBinding binding) {
@@ -136,42 +164,20 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
         }
     }
 
-    static class ArticleComparator extends DiffUtil.Callback {
-
-        private final List<Article> oldList;
-        private final List<Article> newList;
-
-        public ArticleComparator(List<Article> newList, List<Article> oldList) {
-            this.oldList = oldList;
-            this.newList = newList;
+    private static final DiffUtil.ItemCallback<Article> diffCallback
+            = new DiffUtil.ItemCallback<Article>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull Article oldItem, @NonNull Article newItem) {
+            return oldItem.getUrl().equals(newItem.getUrl());
         }
 
         @Override
-        public int getOldListSize() {
-            return oldList.size();
-        }
-
-        @Override
-        public int getNewListSize() {
-            return newList.size();
-        }
-
-        @Override
-        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).getUrl() != null
-                    && oldList.get(oldItemPosition).getUrl().equals(newList.get(newItemPosition).getUrl());
-        }
-
-        @Override
-        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            Article oldItem = oldList.get(oldItemPosition);
-            Article newItem = newList.get(newItemPosition);
-
+        public boolean areContentsTheSame(@NonNull Article oldItem, @NonNull Article newItem) {
             return oldItem.getUrl().equals(newItem.getUrl())
                     && (oldItem.getTitle() != null && oldItem.getTitle().equals(newItem.getTitle()))
                     && (oldItem.getContent() != null && oldItem.getContent().equals(newItem.getContent()))
                     && (oldItem.getDescription() != null && oldItem.getDescription().equals(newItem.getDescription()))
                     && (oldItem.getImage() != null && oldItem.getImage().equals(newItem.getImage()));
         }
-    }
+    };
 }

@@ -27,6 +27,10 @@ public class AuthViewModel extends AndroidViewModel {
         loginResult = accountRepository.getLoginResult();
     }
 
+    public void resetLoginResult() {
+        loginResult.postValue(null);
+    }
+
     public void login(String username, String password) {
         loginResult.setValue(Resource.loading(null));
         accountRepository.login(username, password);

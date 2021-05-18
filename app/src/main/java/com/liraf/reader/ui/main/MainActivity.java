@@ -19,6 +19,8 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
+    private NavController navController;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.MainTheme);
@@ -26,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.navigation_view);
-        NavController navController = Navigation.findNavController(this, R.id.fragment);
+        navController = Navigation.findNavController(this, R.id.fragment);
 
         Bundle args = null;
 
@@ -40,6 +42,19 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        Bundle args = null;
+
+        if (i.getType() != null && i.getType().equals("text/plain")) {
+            args = new Bundle();
+            args.putString("url", i.getExtras().getString("android.intent.extra.TEXT"));
+        }
+
+        navController.navigate(R.id.homeFragment, args);
     }
 
     @Override

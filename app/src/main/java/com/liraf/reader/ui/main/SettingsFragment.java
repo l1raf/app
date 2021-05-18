@@ -40,7 +40,6 @@ public class SettingsFragment extends Fragment {
 
         settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
 
-        binding.btnSaveChanges.setEnabled(false);
         binding.emailEdit.setText(settingsViewModel.getEmail());
         binding.nameEdit.setText(settingsViewModel.getUsername());
         binding.passwordEdit.setText(settingsViewModel.getPassword());
@@ -93,8 +92,15 @@ public class SettingsFragment extends Fragment {
 
         if (id == R.id.logout_menu_item) {
             settingsViewModel.logout();
+            HomeFragment.setShouldFetch(true);
             Intent intent = new Intent(getActivity(), AuthActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            if (getActivity() != null)
+                getActivity().getViewModelStore().clear();
+
             startActivity(intent);
+            getActivity().finish();
         }
 
         return true;

@@ -4,9 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Build;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -14,6 +15,7 @@ import com.liraf.reader.R;
 
 public class WebActivity extends AppCompatActivity {
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +24,7 @@ public class WebActivity extends AppCompatActivity {
         WebView webView = findViewById(R.id.web_view);
 
         if (getIntent().hasExtra("articleUrl")) {
+            webView.setWebChromeClient(new WebChromeClient());
             webView.loadUrl(getIntent().getStringExtra("articleUrl"));
             webView.getSettings().setDomStorageEnabled(true);
             webView.getSettings().setLoadsImagesAutomatically(true);

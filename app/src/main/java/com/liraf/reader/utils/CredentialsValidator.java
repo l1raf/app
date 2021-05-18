@@ -1,14 +1,9 @@
 package com.liraf.reader.utils;
 
-import android.util.Patterns;
-
 public final class CredentialsValidator {
 
     public static boolean isUserNameValid(String username) {
-        if (username == null)
-            return false;
-
-        return Patterns.EMAIL_ADDRESS.matcher(username).matches();
+        return !(username == null || username.length() < 4);
     }
 
     public static boolean isPasswordValid(String password) {

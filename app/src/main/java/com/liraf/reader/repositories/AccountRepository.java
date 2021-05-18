@@ -63,9 +63,9 @@ public class AccountRepository {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful())
-                    Toast.makeText(context, "Successfully updated user", Toast.LENGTH_LONG).show(); //TODO: remove
+                    Toast.makeText(context, R.string.updated_user, Toast.LENGTH_LONG).show();
                 else
-                    Toast.makeText(context, "Failed to update user", Toast.LENGTH_LONG).show(); //TODO: remove
+                    Toast.makeText(context, R.string.failed_to_update_user, Toast.LENGTH_LONG).show();
             }
 
             @Override

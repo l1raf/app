@@ -68,7 +68,10 @@ public class HomeFragment extends Fragment implements OnArticleListener {
         initRecyclerView();
 
         articleViewModel = new ViewModelProvider(this).get(ArticleListViewModel.class);
-        articleViewModel.getArticles().observe(getViewLifecycleOwner(), articles -> articleAdapter.setArticles(articles));
+        articleViewModel.getArticles().observe(getViewLifecycleOwner(), articles -> {
+            articleAdapter.setArticles(articles);
+            binding.recyclerView.smoothScrollToPosition(0);
+        });
 
         articleViewModel.loadArticles(shouldFetch).observe(getViewLifecycleOwner(), articlesResource -> {
             if (articlesResource != null) {
@@ -82,10 +85,14 @@ public class HomeFragment extends Fragment implements OnArticleListener {
                         articles.add(0, article);
                     }
 
+                    binding.progressBar.setVisibility(View.GONE);
                     articleViewModel.setArticles(articles);
                     shouldFetch = false;
                 } else if (articlesResource.status == Resource.Status.ERROR) {
+                    binding.progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), articlesResource.message, Toast.LENGTH_LONG).show();
+                } else if (articlesResource.status == Resource.Status.LOADING && articleAdapter.getItemCount() == 0) {
+                    binding.progressBar.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -201,6 +208,10 @@ public class HomeFragment extends Fragment implements OnArticleListener {
 
         binding.recyclerView.addOnScrollListener(preloader);
         binding.recyclerView.setAdapter(articleAdapter);
+    }
+
+    public static void setShouldFetch(boolean value) {
+        HomeFragment.shouldFetch = value;
     }
 
     private RequestManager initGlide() {

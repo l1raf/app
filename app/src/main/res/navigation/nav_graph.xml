@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/authFragment"
         android:name="com.liraf.reader.ui.auth.AuthFragment"
-        android:label="fragment_auth"
+        android:label=""
         tools:layout="@layout/fragment_auth" >
         <action
             android:id="@+id/action_authFragment_to_loginFragment"
@@ -28,11 +28,11 @@
     <fragment
         android:id="@+id/registrationFragment"
         android:name="com.liraf.reader.ui.auth.RegistrationFragment"
-        android:label="fragment_registration"
+        android:label=""
         tools:layout="@layout/fragment_registration" />
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.liraf.reader.ui.auth.LoginFragment"
-        android:label="fragment_login"
+        android:label=""
         tools:layout="@layout/fragment_login" />
 </navigation>

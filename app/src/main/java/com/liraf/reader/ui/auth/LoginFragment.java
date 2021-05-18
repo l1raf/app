@@ -59,7 +59,7 @@ public class LoginFragment extends Fragment {
             boolean isValidEmail = CredentialsValidator.isUserNameValid(email);
 
             if (!isValidEmail)
-                usernameEditText.setError(getResources().getString(R.string.invalid_username));
+                usernameEditText.setError(getResources().getString(R.string.invalid_login));
 
             if (!isValidPassword)
                 passwordEditText.setError(getResources().getString(R.string.invalid_password));
@@ -89,6 +89,7 @@ public class LoginFragment extends Fragment {
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
+                        authViewModel.resetLoginResult();
                     }
                 } else {
                     loadingProgressBar.setVisibility(View.GONE);
